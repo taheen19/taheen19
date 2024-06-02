@@ -1,4 +1,4 @@
-local MyMixin = {JujuPanels}
+local MyMixin = {}
 
 function MyMixin:CreateWhiteFrame()
     local myFrame = CreateFrame("Frame", "MyWhiteFrame", UIParent)
@@ -12,14 +12,14 @@ function MyMixin:CreateWhiteFrame()
     myFrame:SetMovable(true)
     myFrame:EnableMouse(true)
     myFrame:RegisterForDrag("LeftButton")
-    myFrame:SetScript("OnDragStart", myFrame.StartMoving)
-    myFrame:SetScript("OnDragStop", myFrame.StopMovingOrSizing)
+    myFrame:SetScript("OnDragStart", function() myFrame:StartMoving() end)
+    myFrame:SetScript("OnDragStop", function() myFrame:StopMovingOrSizing() end)
 
     -- Create a button
     local myButton = CreateFrame("Button", "MyButton", myFrame, "UIPanelButtonTemplate")
     myButton:SetSize(100, 50) -- width, height
     myButton:SetText("Player Frame")
-    myButton:SetPoint("LEFT", myFrame, 52, 91) -- position the button at the center of the frame
+    myButton:SetPoint("LEFT", myFrame, "CENTER", 52, 91) -- position the button at the center of the frame
 	
     -- Create a dropdown menu
     local dropdown = CreateFrame("Frame", "MyDropdownMenu", myFrame, "UIDropDownMenuTemplate")
@@ -53,7 +53,7 @@ function MyMixin:CreateWhiteFrame()
 
     -- Button script to create a new frame
     myButton:SetScript("OnClick", function()
-        local newFrame = CreateFrame("Frame", "Player Frame", PlayerFrame)
+        local newFrame = CreateFrame("Frame", "PlayerFrame", PlayerFrame)
         newFrame:SetSize(200, 100) -- replace with the desired size
         newFrame:SetPoint("CENTER") -- replace with the desired position
         newFrame.texture = newFrame:CreateTexture(nil,"BACKGROUND")
@@ -65,3 +65,4 @@ end
 
 Mixin(PlayerFrame, MyMixin)
 PlayerFrame:CreateWhiteFrame()
+
