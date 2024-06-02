@@ -1,0 +1,67 @@
+local MyMixin = {JujuPanels}
+
+function MyMixin:CreateWhiteFrame()
+    local myFrame = CreateFrame("Frame", "MyWhiteFrame", UIParent)
+    myFrame:SetSize(1024, 512) -- replace with the desired size
+    myFrame:SetPoint("CENTER") -- replace with the desired position
+    myFrame.texture = myFrame:CreateTexture(nil,"BACKGROUND")
+    myFrame.texture:SetAllPoints()
+    myFrame.texture:SetTexture("Interface\\Addons\\SharedMedia_Jujuart\\background\\thebox3.tga") --texture of this frame
+	
+    -- Make the frame draggable
+    myFrame:SetMovable(true)
+    myFrame:EnableMouse(true)
+    myFrame:RegisterForDrag("LeftButton")
+    myFrame:SetScript("OnDragStart", myFrame.StartMoving)
+    myFrame:SetScript("OnDragStop", myFrame.StopMovingOrSizing)
+
+    -- Create a button
+    local myButton = CreateFrame("Button", "MyButton", myFrame, "UIPanelButtonTemplate")
+    myButton:SetSize(100, 50) -- width, height
+    myButton:SetText("Player Frame")
+    myButton:SetPoint("LEFT", myFrame, 52, 91) -- position the button at the center of the frame
+	
+    -- Create a dropdown menu
+    local dropdown = CreateFrame("Frame", "MyDropdownMenu", myFrame, "UIDropDownMenuTemplate")
+    dropdown:SetPoint("LEFT", myButton, "RIGHT") -- position the dropdown next to the button
+
+    -- List of available textures
+    local textures = {
+        "Interface\\Addons\\SharedMedia_Jujuart\\background\\playersframe2.tga",
+        "TexturePath2",
+        -- Add more texture paths here
+    }
+
+    -- Variable to store the selected texture
+    local selectedTexture = textures[1] -- Default to the first texture
+
+    -- Initialize the dropdown menu
+    UIDropDownMenu_Initialize(dropdown, function(self, level, menuList)
+        local info = UIDropDownMenu_CreateInfo()
+        for k,v in pairs(textures) do
+            info = UIDropDownMenu_CreateInfo()
+            info.text = v
+            info.value = v
+            info.func = function(self)
+                -- Store the selected texture
+                selectedTexture = self.value
+                UIDropDownMenu_SetSelectedID(dropdown, self:GetID())
+            end
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end)
+
+    -- Button script to create a new frame
+    myButton:SetScript("OnClick", function()
+        local newFrame = CreateFrame("Frame", "Player Frame", PlayerFrame)
+        newFrame:SetSize(200, 100) -- replace with the desired size
+        newFrame:SetPoint("CENTER") -- replace with the desired position
+        newFrame.texture = newFrame:CreateTexture(nil,"BACKGROUND")
+        newFrame.texture:SetAllPoints()
+        -- Apply the selected texture to the new frame
+        newFrame.texture:SetTexture(selectedTexture)
+    end)
+end
+
+Mixin(PlayerFrame, MyMixin)
+PlayerFrame:CreateWhiteFrame()
