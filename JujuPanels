@@ -1,28 +1,27 @@
 local MyMixin = {}
 
-function MyMixin:CreateWhiteFrame() ---Creates a Host frame
-    local myFrame = CreateFrame("Frame", "MyWhiteFrame", UIParent)
-    myFrame:SetSize(1024, 512) -- replace with the desired size
-    myFrame:SetPoint("CENTER") -- replace with the desired position
-    myFrame.texture = myFrame:CreateTexture(nil,"BACKGROUND")
-    myFrame.texture:SetAllPoints()
-    myFrame.texture:SetTexture("Interface\\Addons\\JujuPanels\\background\\blacksquare.tga") --texture of this frame
+function MyMixin:CreateHostFrame() ---Creates a Host frame
+    HostFrame = CreateFrame("Frame", "MyWhiteFrame", UIParent) -- Removed 'local' to make HostFrame global
+    HostFrame:SetSize(512, 640) -- replace with the desired size
+    HostFrame:SetPoint("CENTER") -- replace with the desired position
+    HostFrame.texture = HostFrame:CreateTexture(nil,"BACKGROUND")
+    HostFrame.texture:SetAllPoints()
+    HostFrame.texture:SetTexture("Interface\\Addons\\JujuPanels\\background\\blacksquare.tga") --texture of this frame
 	
     -- Make the frame draggable
-    myFrame:SetMovable(true)
-    myFrame:EnableMouse(true)
-    myFrame:RegisterForDrag("LeftButton")
-    myFrame:SetScript("OnDragStart", function() myFrame:StartMoving() end)
-    myFrame:SetScript("OnDragStop", function() myFrame:StopMovingOrSizing() end)
+    HostFrame:SetMovable(true)
+    HostFrame:EnableMouse(true)
+    HostFrame:RegisterForDrag("LeftButton")
+    HostFrame:SetScript("OnDragStart", function() HostFrame:StartMoving() end)
+    HostFrame:SetScript("OnDragStop", function() HostFrame:StopMovingOrSizing() end)
 
-    -- Create a button wihtin the Host frame
-    local myButton = CreateFrame("Button", "MyButton", myFrame, "UIPanelButtonTemplate")
+    local myButton = CreateFrame("Button", "MyButton", HostFrame, "UIPanelButtonTemplate")
     myButton:SetSize(100, 50) -- width, height
     myButton:SetText("Player Frame")
-    myButton:SetPoint("LEFT", myFrame, "CENTER", -350, 91) -- position the button at the center of the frame
+    myButton:SetPoint("LEFT", HostFrame, "CENTER", -350, 91) -- position the button at the center of the frame
 	
-    -- Create a dropdown menu wihtin the Host frame
-    local dropdown = CreateFrame("Frame", "MyDropdownMenu", myFrame, "UIDropDownMenuTemplate")
+    -- Create a dropdown menu within the Host frame
+    local dropdown = CreateFrame("Frame", "MyDropdownMenu", HostFrame, "UIDropDownMenuTemplate")
     dropdown:SetPoint("LEFT", myButton, "RIGHT",  20, -10) -- position the dropdown next to the button with a 10 pixel gap
 
     -- List of available textures
@@ -56,8 +55,8 @@ function MyMixin:CreateWhiteFrame() ---Creates a Host frame
         end
     end)
 
-    -- Create a horizontal slider wihtin the Host frame
-    local mySlider = CreateFrame("Slider", "MySlider", myFrame, "OptionsSliderTemplate")
+    -- Create a horizontal slider within the Host frame
+    local mySlider = CreateFrame("Slider", "MySlider", HostFrame, "OptionsSliderTemplate")
     mySlider:SetPoint("LEFT", dropdown, "RIGHT", 160, 0) -- position the slider next to the dropdown with a 10 pixel gap
     mySlider:SetMinMaxValues(50, 500) -- set the range of the slider (you can adjust this as needed)
     mySlider:SetValue(200) -- set the initial value of the slider (this should match the initial size of the frame)
@@ -69,12 +68,16 @@ function MyMixin:CreateWhiteFrame() ---Creates a Host frame
         end
     end)
 
-    -- Create a vertical slider wihtin the Host frame
-    local myVerticalSlider = CreateFrame("Slider", "MyVerticalSlider", myFrame, "OptionsSliderTemplate")
+    -- Create a vertical slider within the Host frame
+    local myVerticalSlider = CreateFrame("Slider", "MyVerticalSlider", HostFrame, "OptionsSliderTemplate")
     myVerticalSlider:SetPoint("LEFT", mySlider, "RIGHT", 20, 0) -- position the vertical slider next to the horizontal slider with a 20 pixel gap
     myVerticalSlider:SetMinMaxValues(50, 500) -- set the range of the slider (you can adjust this as needed)
     myVerticalSlider:SetValue(100) -- set the initial value of the slider (this should match the initial height of the frame)
     myVerticalSlider:SetOrientation('VERTICAL') -- set the orientation to vertical
+    -- Create a texture for the slider
+    myVerticalSlider.texture = myVerticalSlider:CreateTexture(nil, "BACKGROUND")
+    myVerticalSlider.texture:SetAllPoints()
+    myVerticalSlider.texture:SetTexture("Interface\\Addons\\JujuPanels\\background\\verticle.tga") -- replace with the path to your texture
     myVerticalSlider:SetScript("OnValueChanged", function(self, value)
         -- Resize the frame when the slider value changes
         if _G["PF"] then
@@ -84,7 +87,7 @@ function MyMixin:CreateWhiteFrame() ---Creates a Host frame
     end)
 
     -- Create a checkbox
-    local myCheckbox = CreateFrame("CheckButton", "MyCheckbox", myFrame, "ChatConfigCheckButtonTemplate")
+    local myCheckbox = CreateFrame("CheckButton", "MyCheckbox", HostFrame, "ChatConfigCheckButtonTemplate")
     myCheckbox:SetPoint("LEFT", myVerticalSlider, "RIGHT", 10, 0) -- position the checkbox next to the vertical slider with a 10 pixel gap
     myCheckbox.tooltip = "Show/Hide PF"
     _G[myCheckbox:GetName() .. "Text"]:SetText("Show PF")
@@ -105,7 +108,7 @@ function MyMixin:CreateWhiteFrame() ---Creates a Host frame
     end)
 
     -- Frame script to show the PF frame on load if the checkbox is checked
-    myFrame:SetScript("OnLoad", function()
+    HostFrame:SetScript("OnLoad", function()
         if myCheckbox:GetChecked() and _G["PF"] then
             _G["PF"]:Show()
         end
@@ -115,7 +118,7 @@ function MyMixin:CreateWhiteFrame() ---Creates a Host frame
 local colorSliders = {}
 local colors = {"Red", "Green", "Blue"}
 for i, color in ipairs(colors) do
-    local slider = CreateFrame("Slider", "My" .. color .. "Slider", myFrame, "OptionsSliderTemplate")
+    local slider = CreateFrame("Slider", "My" .. color .. "Slider", HostFrame, "OptionsSliderTemplate")
     slider:SetPoint("TOP", myVerticalSlider, "BOTTOM", 0, -10 - (i - 1) * 30) -- position the sliders below each other with a 30 pixel gap
     slider:SetMinMaxValues(0, 1) -- set the range of the slider
     slider:SetValue(1) -- set the initial value of the slider
@@ -147,11 +150,52 @@ end
             newFrame.texture:SetAllPoints()
             -- Apply the selected texture to the new frame
             newFrame.texture:SetTexture(selectedTexture)
+			  
+			  -- Save the size, position, and texture to JujupanelsDB
+        JujupanelsDB = {
+            size = {200, 100},
+            position = {"CENTER"},
+            texture = selectedTexture,
+        }
         end
     end)
 	
-	
+	-- Event script to load the size, position, and texture from JujupanelsDB when the addon is loaded
+HostFrame:SetScript("OnEvent", function(self, event, arg1)
+    if event == "ADDON_LOADED" and arg1 == "Jujupanels" then
+        if JujupanelsDB then
+            -- Load the size, position, and texture from JujupanelsDB
+            local size = JujupanelsDB.size
+            local position = JujupanelsDB.position
+            local texture = JujupanelsDB.texture
+            
+            -- Apply the size, position, and texture to the PF frame
+            _G["PF"]:SetSize(unpack(size))
+            _G["PF"]:SetPoint(unpack(position))
+            _G["PF"].texture:SetTexture(texture)
+        end
+    end
+end)
+HostFrame:RegisterEvent("ADDON_LOADED")
+
+        -- Create an exit button within the HostFrame
+    local exitButton = CreateFrame("Button", "ExitButton", HostFrame, "UIPanelButtonTemplate")
+    exitButton:SetSize(100, 50) -- width, height
+    exitButton:SetText("Exit")
+    exitButton:SetPoint("TOPRIGHT", HostFrame, "TOPRIGHT", -10, -10) -- position the exit button at the top right corner of the HostFrame
+
+    -- Exit button script to hide the HostFrame when clicked
+    exitButton:SetScript("OnClick", function()
+        HostFrame:Hide()
+    end)
 end
 
 Mixin(PlayerFrame, MyMixin)
-PlayerFrame:CreateWhiteFrame()
+PlayerFrame:CreateHostFrame()
+
+-- Slash command to show the HostFrame
+SLASH_JUJU1 = "/juju"
+SlashCmdList["JUJU"] = function(msg)
+    HostFrame:Show()
+end
+
